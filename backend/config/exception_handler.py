@@ -19,6 +19,11 @@ def _extract_message(data):
     if isinstance(data, dict):
         if "detail" in data:
             return str(data["detail"])
+        if "non_field_errors" in data:
+            errors = data["non_field_errors"]
+            if isinstance(errors, list):
+                return "; ".join(str(e) for e in errors)
+            return str(errors)
         messages = []
         for key, value in data.items():
             if isinstance(value, list):
