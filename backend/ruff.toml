@@ -1,0 +1,13 @@
+[lint]
+select = ["E", "F", "W", "I", "S", "B", "UP"]
+ignore = ["E501"]
+
+[lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]
+"payments/adapters/legacy_processor.py" = ["S311"]
+"*/migrations/*.py" = ["ALL"]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"

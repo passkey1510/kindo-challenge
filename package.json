@@ -1,0 +1,30 @@
+{
+  "name": "kindo-challenge",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Full-stack school field trip payment application",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.4.2",
+    "@commitlint/config-conventional": "^20.4.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1"
+  },
+  "lint-staged": {
+    "frontend/src/**/*.{ts,tsx}": [
+      "prettier --write",
+      "bash -c 'cd frontend && npx eslint --fix'"
+    ],
+    "frontend/src/**/*.{css,json}": [
+      "prettier --write"
+    ],
+    "backend/**/*.py": [
+      "bash -c 'cd backend && source venv/bin/activate && ruff check --fix'",
+      "bash -c 'cd backend && source venv/bin/activate && ruff format'"
+    ]
+  }
+}

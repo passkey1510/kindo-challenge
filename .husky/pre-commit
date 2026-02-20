@@ -1,0 +1,14 @@
+# Lint-staged: prettier, eslint, ruff on staged files
+npx lint-staged
+
+# TypeScript type check
+echo "Running TypeScript check..."
+(cd frontend && npx tsc --noEmit)
+
+# npm audit (frontend, non-blocking)
+echo "Running npm audit..."
+(cd frontend && npm audit --audit-level=high --omit=dev 2>/dev/null) || echo "⚠ npm audit found issues (review recommended)"
+
+# pip-audit (backend, non-blocking)
+echo "Running pip-audit..."
+(cd backend && source venv/bin/activate && pip-audit -r requirements.txt 2>/dev/null) || echo "⚠ pip-audit found issues (review recommended)"
