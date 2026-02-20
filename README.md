@@ -35,7 +35,7 @@ graph LR
 |------------|-----------------------------------------------------|
 | Frontend   | React 19, Vite, TypeScript, TanStack Query, React Hook Form, Tailwind CSS v4 |
 | Backend    | Python 3.12, Django 5.1, Django REST Framework      |
-| Database   | PostgreSQL 16 (Docker dev / Neon prod)               |
+| Database   | PostgreSQL 17 (Docker dev / Neon prod)               |
 | Testing    | pytest + pytest-django (backend), Vitest + RTL (frontend) |
 | Deploy     | Vercel (frontend), Railway (backend), Neon (DB)      |
 | CI/CD      | GitHub Actions                                       |
@@ -124,7 +124,7 @@ sequenceDiagram
     alt Success
       LP-->>PS: payment_id
       PS-->>API: PaymentResult(success)
-      API-->>FE: 200 transaction data
+      API-->>FE: 201 transaction data
     else Declined (retryable)
       LP-->>PS: error
       PS->>PS: wait (1s, 2s, 4s)
@@ -138,7 +138,7 @@ sequenceDiagram
 
 ### Synchronous Retries (No Celery)
 
-Retries happen synchronously within the request. Worst case is ~7.5s (3 attempts × 1.5s processing + 1s + 2s backoff between attempts). The frontend sets a 20s timeout. This keeps the architecture simple — no message queues or async workers needed for this use case.
+Retries happen synchronously within the request. Worst case is ~7.5s (3 × 1.5s processing + 1s + 2s backoff between attempts). The frontend sets a 20s timeout. This keeps the architecture simple — no message queues or async workers needed for this use case.
 
 ### Multi-Step Wizard
 

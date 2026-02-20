@@ -1,12 +1,14 @@
 import logging
 
 from django.db import IntegrityError
+from drf_spectacular.utils import extend_schema
 from rest_framework import generics, serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Registration, Transaction
 from .serializers import (
+    ErrorResponseSerializer,
     PaymentRequestSerializer,
     RegistrationSerializer,
     TransactionSerializer,
@@ -30,6 +32,15 @@ class RegistrationCreateView(generics.CreateAPIView):
 
 
 class PaymentCreateView(APIView):
+    @extend_schema(
+        request=PaymentRequestSerializer,
+        responses={
+            201: TransactionSerializer,
+            400: ErrorResponseSerializer,
+            502: ErrorResponseSerializer,
+            500: ErrorResponseSerializer,
+        },
+    )
     def post(self, request):
         serializer = PaymentRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

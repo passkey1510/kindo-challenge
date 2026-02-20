@@ -86,7 +86,7 @@ Full-stack school field trip payment app. Parents view trip â†’ register child â
 ```yaml
 services:
   db:
-    image: postgres:16
+    image: postgres:17
     environment:
       POSTGRES_DB: kindo
       POSTGRES_USER: kindo

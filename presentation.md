@@ -62,8 +62,8 @@ style: |
 `PaymentService → PaymentProcessorAdapter (ABC) → LegacyPaymentAdapter → LegacyProcessor`
 Provided code untouched. Adapter classifies errors as retryable vs non-retryable. Swap to HTTP client in prod.
 
-**Retry with exponential backoff** — 3 attempts, 1s → 2s → 4s delays
-Only retries "declined by processor" errors. Validation errors fail immediately. Worst case ~12s; frontend has 20s timeout. Synchronous — no Celery needed for this scale.
+**Retry with exponential backoff** — 3 attempts, 1s → 2s delays between attempts
+Only retries "declined by processor" errors. Validation errors fail immediately. Worst case ~7.5s; frontend has 20s timeout. Synchronous — no Celery needed for this scale.
 
 **3-layer validation** — React Hook Form (instant UX) → DRF serializers (authoritative) → Legacy processor (defence in depth)
 

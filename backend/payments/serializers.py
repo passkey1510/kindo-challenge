@@ -31,11 +31,25 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return data
 
 
+class ErrorResponseSerializer(serializers.Serializer):
+    error = serializers.BooleanField(default=True)
+    message = serializers.CharField()
+    code = serializers.CharField()
+
+
 class PaymentRequestSerializer(serializers.Serializer):
-    registration_id = serializers.IntegerField()
-    card_number = serializers.CharField(max_length=19)
-    expiry_date = serializers.CharField(max_length=5)
-    cvv = serializers.CharField(max_length=3)
+    registration_id = serializers.IntegerField(
+        help_text="ID of the registration to pay for"
+    )
+    card_number = serializers.CharField(
+        max_length=19,
+        help_text="16-digit card number, spaces allowed (e.g. 4111 1111 1111 1111)",
+    )
+    expiry_date = serializers.CharField(
+        max_length=5,
+        help_text="Card expiry in MM/YY format (e.g. 12/26)",
+    )
+    cvv = serializers.CharField(max_length=3, help_text="3-digit CVV (e.g. 123)")
 
     def validate_card_number(self, value):
         cleaned = value.replace(" ", "")
