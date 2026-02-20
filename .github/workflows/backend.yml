@@ -66,7 +66,7 @@ jobs:
           badge-title: Backend Coverage
 
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
     needs: [test]
     runs-on: ubuntu-latest
     steps:
