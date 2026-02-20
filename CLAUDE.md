@@ -21,15 +21,18 @@ Full-stack school field trip payment app. Parents view trip → register child �
 - `payments` — registration, transaction models, payment service, API
 
 **Models:**
-- `Trip` — name, date, location, cost, description, school_id, activity_id
+- `Trip` — name, date, location, latitude, longitude, cost, description, school_id, activity_id
 - `Registration` — student_name, parent_name, parent_email, trip (FK), created_at
 - `Transaction` — registration (FK), amount, card_last_four, status (pending/success/failed), transaction_id, error_message, attempts, created_at
 
 **Endpoints (versioned: `/api/v1/`):**
+- `GET /api/v1/trips/` — list all trips
 - `GET /api/v1/trips/:id/` — trip details
 - `POST /api/v1/registrations/` — register child for trip
 - `POST /api/v1/payments/` — submit payment (registration_id + card info)
 - `GET /api/v1/payments/:id/status/` — payment confirmation / receipt
+- `GET /api/docs/` — interactive Swagger UI (drf-spectacular)
+- `GET /api/schema/` — OpenAPI 3 schema
 
 **Service Layer (`payments/services/payment_service.py`):**
 - `PaymentService` wraps the legacy processor via an **adapter pattern**
@@ -51,6 +54,8 @@ Full-stack school field trip payment app. Parents view trip → register child �
 **Config:**
 - `dj-database-url` for DATABASE_URL parsing
 - `django-cors-headers` for CORS
+- `drf-spectacular` for OpenAPI 3 / Swagger docs
+- `whitenoise` for static file serving
 - Environment variables for all secrets/config
 - Gunicorn for production
 
@@ -126,12 +131,15 @@ services:
 - Gunicorn entrypoint
 
 **Vercel (frontend):**
-- Auto-deploy via Vercel GitHub integration (no GH Actions needed for frontend)
+- Deploys via GitHub Actions using Vercel CLI
 - Env var: VITE_API_URL → Railway backend URL
 
 **GitHub Actions (`.github/workflows/`):**
-- `ci.yml` — on push: run backend tests (pytest) + frontend tests
-- `deploy.yml` — on push to main: deploy backend to Railway
+- `backend.yml` — on push: pytest + coverage; on push to main: deploy to Railway
+- `frontend.yml` — on push: tsc + vitest + coverage; on push to main: deploy to Vercel
+- Path-filtered (backend changes only trigger backend CI, and vice versa)
+- Gated deploys: requires push to main + `DEPLOY_ENABLED=true`
+- `workflow_dispatch` for manual triggers
 
 ### Testing
 - **Backend:** pytest + pytest-django
@@ -160,10 +168,11 @@ The provided `LegacyPaymentProcessor` class goes in `payments/adapters/legacy_pr
 - Live demo links (Vercel + Railway)
 
 ## Seed Data
-Create a Django management command `seed_trips` that creates a sample field trip:
+Django management command `seed_trips` creates a sample field trip:
 - "Auckland Museum Field Trip"
-- Date: 2026-03-15
+- Date: today + 30 days (dynamic)
 - Location: "Auckland Museum, Auckland"
+- Latitude: -36.8601, Longitude: 174.7787
 - Cost: $25.00 NZD
 - school_id: "SCH-001"
 - activity_id: "ACT-FIELD-001"
