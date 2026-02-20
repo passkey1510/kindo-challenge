@@ -6,3 +6,4 @@ gunicorn>=23.0,<24
 psycopg2-binary>=2.9,<3
 pytest>=8.0,<9
 pytest-django>=4.9,<5
+pytest-cov>=6.0,<7

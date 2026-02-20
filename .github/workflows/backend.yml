@@ -10,6 +10,10 @@ on:
     paths:
       - "backend/**"
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -46,11 +50,19 @@ jobs:
           DATABASE_URL: postgres://kindo:kindo@localhost:5432/kindo_test
         run: python manage.py migrate
 
-      - name: Run tests
+      - name: Run tests with coverage
         working-directory: backend
         env:
           DATABASE_URL: postgres://kindo:kindo@localhost:5432/kindo_test
         run: pytest -v
+
+      - name: Coverage report
+        if: github.event_name == 'pull_request'
+        uses: MishaKav/pytest-coverage-comment@v1.2.0
+        with:
+          pytest-xml-coverage-path: backend/coverage.xml
+          title: Backend Coverage
+          badge-title: Backend Coverage
 
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
