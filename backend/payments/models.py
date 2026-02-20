@@ -17,6 +17,7 @@ class Registration(models.Model):
         constraints = [
             models.UniqueConstraint(
                 Lower("student_name"),
+                Lower("parent_email"),
                 "trip",
                 name="unique_student_per_trip",
             )

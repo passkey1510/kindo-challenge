@@ -121,6 +121,30 @@ class TestRegistrationAPI:
         assert r1.status_code == 201
         assert r2.status_code == 201
 
+    def test_same_name_different_parent_allowed(self, api_client, sample_trip):
+        r1 = api_client.post(
+            "/api/v1/registrations/",
+            {
+                "student_name": "Jane Smith",
+                "parent_name": "John Smith",
+                "parent_email": "john@example.com",
+                "trip": sample_trip.id,
+            },
+            format="json",
+        )
+        r2 = api_client.post(
+            "/api/v1/registrations/",
+            {
+                "student_name": "Jane Smith",
+                "parent_name": "Sarah Smith",
+                "parent_email": "sarah@example.com",
+                "trip": sample_trip.id,
+            },
+            format="json",
+        )
+        assert r1.status_code == 201
+        assert r2.status_code == 201
+
     def test_create_registration_invalid_email(self, api_client, sample_trip):
         response = api_client.post(
             "/api/v1/registrations/",

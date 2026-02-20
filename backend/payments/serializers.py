@@ -22,6 +22,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if Registration.objects.filter(
             student_name__iexact=data["student_name"],
+            parent_email__iexact=data["parent_email"],
             trip=data["trip"],
         ).exists():
             raise serializers.ValidationError(
