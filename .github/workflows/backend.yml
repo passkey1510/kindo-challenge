@@ -58,7 +58,7 @@ jobs:
 
       - name: Coverage report
         if: github.event_name == 'pull_request'
-        uses: MishaKav/pytest-coverage-comment@main
+        uses: MishaKav/pytest-coverage-comment@v1.2.0
         with:
           pytest-xml-coverage-path: backend/coverage.xml
           title: Backend Coverage
