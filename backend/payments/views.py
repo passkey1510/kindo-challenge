@@ -1,4 +1,5 @@
-from rest_framework import generics, status
+from django.db import IntegrityError
+from rest_framework import generics, serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -14,6 +15,14 @@ from .services.payment_service import PaymentService
 class RegistrationCreateView(generics.CreateAPIView):
     queryset = Registration.objects.all()
     serializer_class = RegistrationSerializer
+
+    def perform_create(self, serializer):
+        try:
+            serializer.save()
+        except IntegrityError:
+            raise serializers.ValidationError(
+                "This student is already registered for this trip."
+            ) from None
 
 
 class PaymentCreateView(APIView):
