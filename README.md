@@ -76,6 +76,8 @@ npm run dev
 
 ## API Endpoints
 
+Interactive API docs available at [`/api/docs/`](https://backend-production-47d5.up.railway.app/api/docs/) (Swagger UI).
+
 All endpoints are versioned under `/api/v1/`.
 
 | Method | Endpoint                       | Description              |
@@ -160,7 +162,7 @@ All amounts are stored as `DecimalField` in the database and displayed as NZD ($
 
 Requires Docker Compose running (`docker compose up`) so that PostgreSQL is available.
 
-**Backend (26 tests):**
+**Backend (31 tests):**
 ```bash
 cd backend
 source venv/bin/activate
