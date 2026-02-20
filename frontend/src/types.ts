@@ -39,7 +39,7 @@ export interface PaymentResponse {
   card_last_four: string;
   status: 'pending' | 'success' | 'failed';
   transaction_id: string;
-  error_message: string | null;
+  error_message: string;
   attempts: number;
   created_at: string;
 }

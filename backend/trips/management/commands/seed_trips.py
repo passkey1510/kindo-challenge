@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 from django.core.management.base import BaseCommand
 
@@ -14,7 +14,7 @@ class Command(BaseCommand):
             activity_id="ACT-FIELD-001",
             defaults={
                 "name": "Auckland Museum Field Trip",
-                "date": date(2026, 3, 15),
+                "date": date.today() + timedelta(days=30),
                 "location": "Auckland Museum, Auckland",
                 "cost": 25.00,
                 "description": (

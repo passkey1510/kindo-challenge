@@ -255,6 +255,29 @@ class TestPaymentAPI:
         )
         assert response.status_code == 400
 
+    def test_payment_already_paid(self, api_client, sample_registration):
+        Transaction.objects.create(
+            registration=sample_registration,
+            amount=sample_registration.trip.cost,
+            card_last_four="1111",
+            status=Transaction.Status.SUCCESS,
+            transaction_id="TX-ALREADY-PAID",
+            attempts=1,
+        )
+        response = api_client.post(
+            "/api/v1/payments/",
+            {
+                "registration_id": sample_registration.id,
+                "card_number": "4111111111111111",
+                "expiry_date": "12/26",
+                "cvv": "123",
+            },
+            format="json",
+        )
+        assert response.status_code == 400
+        data = response.json()
+        assert data["code"] == "ALREADY_PAID"
+
     def test_payment_nonexistent_registration(self, api_client, db):
         response = api_client.post(
             "/api/v1/payments/",

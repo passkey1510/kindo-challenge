@@ -34,7 +34,7 @@ const mockPayment = {
   card_last_four: '5678',
   status: 'success' as const,
   transaction_id: 'TXN-12345',
-  error_message: null,
+  error_message: '',
   attempts: 1,
   created_at: '2026-02-20T10:01:00Z',
 };

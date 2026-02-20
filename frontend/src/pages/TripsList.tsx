@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Loader2, MapPin, Calendar, DollarSign } from 'lucide-react';
 import { fetchTrips } from '../api';
+import { Button } from '../components/ui/Button';
 
 export function TripsList() {
   const {
@@ -27,13 +28,7 @@ export function TripsList() {
     return (
       <div className="text-center space-y-4 py-12">
         <p className="text-error font-medium">Failed to load trips.</p>
-        <button
-          type="button"
-          onClick={() => refetch()}
-          className="cursor-pointer bg-navy hover:bg-primary text-white font-semibold py-2 px-4 rounded-xl transition-colors duration-200"
-        >
-          Try Again
-        </button>
+        <Button onClick={() => refetch()}>Try Again</Button>
       </div>
     );
   }

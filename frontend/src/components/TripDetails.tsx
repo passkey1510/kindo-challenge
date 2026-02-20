@@ -1,12 +1,6 @@
 import { MapPin, Calendar, DollarSign } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import '../utils/leafletSetup';
 import type { Trip } from '../types';
 import { Button } from './ui/Button';
-
-// Auckland Museum coordinates
-const AUCKLAND_MUSEUM: [number, number] = [-36.8601, 174.7787];
 
 interface TripDetailsProps {
   trip: Trip;
@@ -54,23 +48,6 @@ export function TripDetails({ trip, onRegister }: TripDetailsProps) {
             <p className="font-semibold text-lg">${trip.cost} NZD</p>
           </div>
         </div>
-      </div>
-
-      <div className="rounded-xl overflow-hidden border border-border h-56 sm:h-64">
-        <MapContainer
-          center={AUCKLAND_MUSEUM}
-          zoom={16}
-          scrollWheelZoom={false}
-          className="h-full w-full"
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <Marker position={AUCKLAND_MUSEUM}>
-            <Popup>{trip.location}</Popup>
-          </Marker>
-        </MapContainer>
       </div>
 
       <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">

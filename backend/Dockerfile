@@ -3,4 +3,5 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . .
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
+RUN python manage.py collectstatic --noinput 2>/dev/null || true
+CMD python manage.py migrate --noinput && python manage.py seed_trips && gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000}
