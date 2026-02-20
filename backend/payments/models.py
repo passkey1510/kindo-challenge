@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.functions import Lower
 
 from trips.models import Trip
 
@@ -15,7 +16,8 @@ class Registration(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["student_name", "trip"],
+                Lower("student_name"),
+                "trip",
                 name="unique_student_per_trip",
             )
         ]

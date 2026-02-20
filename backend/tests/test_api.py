@@ -69,7 +69,7 @@ class TestRegistrationAPI:
     def test_create_duplicate_registration_case_insensitive(
         self, api_client, sample_trip
     ):
-        api_client.post(
+        response1 = api_client.post(
             "/api/v1/registrations/",
             {
                 "student_name": "Jane Smith",
@@ -79,6 +79,8 @@ class TestRegistrationAPI:
             },
             format="json",
         )
+        assert response1.status_code == 201
+
         response = api_client.post(
             "/api/v1/registrations/",
             {
