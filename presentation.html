@@ -122,8 +122,8 @@ a { color: #2d6a4f; }
 <p><strong>Adapter pattern for legacy integration</strong><br />
 <code>PaymentService → PaymentProcessorAdapter (ABC) → LegacyPaymentAdapter → LegacyProcessor</code><br />
 Provided code untouched. Adapter classifies errors as retryable vs non-retryable. Swap to HTTP client in prod.</p>
-<p><strong>Retry with exponential backoff</strong> — 3 attempts, 1s → 2s → 4s delays<br />
-Only retries &quot;declined by processor&quot; errors. Validation errors fail immediately. Worst case ~12s; frontend has 20s timeout. Synchronous — no Celery needed for this scale.</p>
+<p><strong>Retry with exponential backoff</strong> — 3 attempts, 1s → 2s delays between attempts<br />
+Only retries &quot;declined by processor&quot; errors. Validation errors fail immediately. Worst case ~7.5s; frontend has 20s timeout. Synchronous — no Celery needed for this scale.</p>
 <p><strong>3-layer validation</strong> — React Hook Form (instant UX) → DRF serializers (authoritative) → Legacy processor (defence in depth)</p>
 <p><strong>Data model choices</strong> — UUID PKs (no enumeration), <code>Decimal</code> for money, case-insensitive unique constraint on registration, attempt count tracked per transaction</p>
 <p><strong>Testing</strong> — 31 backend + 36 frontend tests. Service retry logic mocked. All API edge cases covered (duplicate registration, double payment, invalid card formats).</p>

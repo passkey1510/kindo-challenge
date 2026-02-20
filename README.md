@@ -138,7 +138,7 @@ sequenceDiagram
 
 ### Synchronous Retries (No Celery)
 
-Retries happen synchronously within the request. Worst case is ~11.5s (3 attempts × 1.5s processing + 1s + 2s backoff between attempts). The frontend sets a 20s timeout. This keeps the architecture simple — no message queues or async workers needed for this use case.
+Retries happen synchronously within the request. Worst case is ~7.5s (3 × 1.5s processing + 1s + 2s backoff between attempts). The frontend sets a 20s timeout. This keeps the architecture simple — no message queues or async workers needed for this use case.
 
 ### Multi-Step Wizard
 
