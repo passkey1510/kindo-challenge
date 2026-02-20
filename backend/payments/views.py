@@ -1,3 +1,5 @@
+import logging
+
 from django.db import IntegrityError
 from rest_framework import generics, serializers, status
 from rest_framework.response import Response
@@ -10,6 +12,8 @@ from .serializers import (
     TransactionSerializer,
 )
 from .services.payment_service import PaymentService
+
+logger = logging.getLogger(__name__)
 
 
 class RegistrationCreateView(generics.CreateAPIView):
@@ -53,6 +57,10 @@ class PaymentCreateView(APIView):
                 cvv=serializer.validated_data["cvv"],
             )
         except Exception:
+            logger.exception(
+                "Unexpected error processing payment for registration %s",
+                registration.id,
+            )
             return Response(
                 {
                     "error": True,
@@ -63,6 +71,12 @@ class PaymentCreateView(APIView):
             )
 
         if transaction.status == Transaction.Status.FAILED:
+            logger.warning(
+                "Payment failed for registration %s after %d attempts: %s",
+                registration.id,
+                transaction.attempts,
+                transaction.error_message,
+            )
             return Response(
                 {
                     "error": True,

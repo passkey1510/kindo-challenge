@@ -2,7 +2,7 @@
 
 A full-stack school field trip payment application. Parents can view trip details, register their child, make a payment, and receive confirmation — all in a single-page wizard flow.
 
-**Live Demo:** [Frontend (Vercel)](#) | [Backend API (Railway)](#)
+**Live Demo:** [Frontend (Vercel)](https://kindo-challenge.vercel.app) | [Backend API (Railway)](https://backend-production-47d5.up.railway.app/api/v1/trips/)
 
 ## Architecture
 
