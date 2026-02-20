@@ -231,7 +231,7 @@ All generated code was reviewed for correctness, security, and adherence to the 
 graph TB
   GH[GitHub] -->|push to main| GHA[GitHub Actions]
   GHA -->|deploy backend| Railway[Railway<br/>Django + Gunicorn]
-  GH -->|auto-deploy| Vercel[Vercel<br/>React SPA]
+  GHA -->|deploy frontend| Vercel[Vercel<br/>React SPA]
   Railway --- Neon[(Neon PostgreSQL)]
   Vercel -->|API calls| Railway
 ```
@@ -241,7 +241,7 @@ graph TB
 - Deploys via Dockerfile with Gunicorn
 
 **Frontend (Vercel):**
-- Auto-deploys from GitHub
+- Deploys via GitHub Actions using Vercel CLI (`vercel build --prod && vercel deploy --prebuilt --prod`)
 - Set env var: `VITE_API_URL` → Railway backend URL
 
 **Database (Neon):**
