@@ -31,6 +31,12 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return data
 
 
+class ErrorResponseSerializer(serializers.Serializer):
+    error = serializers.BooleanField(default=True)
+    message = serializers.CharField()
+    code = serializers.CharField()
+
+
 class PaymentRequestSerializer(serializers.Serializer):
     registration_id = serializers.IntegerField()
     card_number = serializers.CharField(max_length=19)
