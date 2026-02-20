@@ -16,6 +16,8 @@ class Command(BaseCommand):
                 "name": "Auckland Museum Field Trip",
                 "date": date.today() + timedelta(days=30),
                 "location": "Auckland Museum, Auckland",
+                "latitude": -36.8601,
+                "longitude": 174.7787,
                 "cost": 25.00,
                 "description": (
                     "Join us for an exciting day at the Auckland Museum! "

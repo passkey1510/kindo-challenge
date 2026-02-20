@@ -3,6 +3,8 @@ export interface Trip {
   name: string;
   date: string;
   location: string;
+  latitude: number | null;
+  longitude: number | null;
   cost: string;
   description: string;
   school_id: string;

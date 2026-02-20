@@ -12,6 +12,8 @@ const mockTrip = {
   name: 'Auckland Museum Field Trip',
   date: '2026-03-15',
   location: 'Auckland Museum, Auckland',
+  latitude: -36.8601,
+  longitude: 174.7787,
   cost: '25.00',
   description: 'A fun educational trip to the Auckland Museum.',
   school_id: 'SCH-001',

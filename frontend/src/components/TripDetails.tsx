@@ -1,4 +1,7 @@
 import { MapPin, Calendar, DollarSign } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import '../utils/leafletSetup';
 import type { Trip } from '../types';
 import { Button } from './ui/Button';
 
@@ -14,6 +17,8 @@ export function TripDetails({ trip, onRegister }: TripDetailsProps) {
     month: 'long',
     day: 'numeric',
   });
+
+  const hasCoordinates = trip.latitude != null && trip.longitude != null;
 
   return (
     <div className="space-y-6">
@@ -49,6 +54,25 @@ export function TripDetails({ trip, onRegister }: TripDetailsProps) {
           </div>
         </div>
       </div>
+
+      {hasCoordinates && (
+        <div className="rounded-xl overflow-hidden border border-border h-56 sm:h-64">
+          <MapContainer
+            center={[trip.latitude!, trip.longitude!]}
+            zoom={16}
+            scrollWheelZoom={false}
+            className="h-full w-full"
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={[trip.latitude!, trip.longitude!]}>
+              <Popup>{trip.location}</Popup>
+            </Marker>
+          </MapContainer>
+        </div>
+      )}
 
       <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
         <p className="text-sm text-text-muted">
