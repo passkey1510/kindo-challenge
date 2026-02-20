@@ -11,6 +11,8 @@ class TripSerializer(serializers.ModelSerializer):
             "name",
             "date",
             "location",
+            "latitude",
+            "longitude",
             "cost",
             "description",
             "school_id",

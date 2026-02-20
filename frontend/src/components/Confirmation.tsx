@@ -53,7 +53,7 @@ export function Confirmation({ payment, error, onRetry, onStartOver }: Confirmat
       <div>
         <h2 className="text-2xl font-bold text-text">Payment Successful!</h2>
         <p className="mt-2 text-text-muted">
-          Your registration has been confirmed. A receipt has been sent to your email.
+          Your registration has been confirmed. Please save this page for your records.
         </p>
       </div>
 

@@ -34,6 +34,16 @@ class PaymentCreateView(APIView):
             id=serializer.validated_data["registration_id"]
         )
 
+        if registration.transactions.filter(status=Transaction.Status.SUCCESS).exists():
+            return Response(
+                {
+                    "error": True,
+                    "message": "This registration has already been paid.",
+                    "code": "ALREADY_PAID",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         service = PaymentService()
         try:
             transaction = service.process_payment(
