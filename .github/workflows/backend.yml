@@ -53,7 +53,7 @@ jobs:
         run: pytest -v
 
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
     needs: [test]
     runs-on: ubuntu-latest
     steps:
