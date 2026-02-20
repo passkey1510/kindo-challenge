@@ -12,6 +12,14 @@ class Registration(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["student_name", "trip"],
+                name="unique_student_per_trip",
+            )
+        ]
+
     def __str__(self):
         return f"{self.student_name} - {self.trip.name}"
 
