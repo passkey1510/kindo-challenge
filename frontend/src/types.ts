@@ -3,6 +3,8 @@ export interface Trip {
   name: string;
   date: string;
   location: string;
+  latitude: number | null;
+  longitude: number | null;
   cost: string;
   description: string;
   school_id: string;
@@ -39,7 +41,7 @@ export interface PaymentResponse {
   card_last_four: string;
   status: 'pending' | 'success' | 'failed';
   transaction_id: string;
-  error_message: string | null;
+  error_message: string;
   attempts: number;
   created_at: string;
 }

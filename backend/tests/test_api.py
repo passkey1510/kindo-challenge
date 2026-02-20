@@ -52,6 +52,99 @@ class TestRegistrationAPI:
         )
         assert response.status_code == 400
 
+    def test_create_duplicate_registration(self, api_client, sample_trip):
+        payload = {
+            "student_name": "Jane Smith",
+            "parent_name": "John Smith",
+            "parent_email": "john@example.com",
+            "trip": sample_trip.id,
+        }
+        response1 = api_client.post("/api/v1/registrations/", payload, format="json")
+        assert response1.status_code == 201
+
+        response2 = api_client.post("/api/v1/registrations/", payload, format="json")
+        assert response2.status_code == 400
+        assert "already registered" in response2.json()["message"].lower()
+
+    def test_create_duplicate_registration_case_insensitive(
+        self, api_client, sample_trip
+    ):
+        response1 = api_client.post(
+            "/api/v1/registrations/",
+            {
+                "student_name": "Jane Smith",
+                "parent_name": "John Smith",
+                "parent_email": "john@example.com",
+                "trip": sample_trip.id,
+            },
+            format="json",
+        )
+        assert response1.status_code == 201
+
+        response = api_client.post(
+            "/api/v1/registrations/",
+            {
+                "student_name": "jane smith",
+                "parent_name": "John Smith",
+                "parent_email": "john@example.com",
+                "trip": sample_trip.id,
+            },
+            format="json",
+        )
+        assert response.status_code == 400
+
+    def test_same_student_different_trip_allowed(self, api_client, sample_trip, db):
+        from datetime import date
+        from decimal import Decimal
+
+        from trips.models import Trip
+
+        other_trip = Trip.objects.create(
+            name="Zoo Trip",
+            date=date(2026, 4, 10),
+            location="Auckland Zoo",
+            cost=Decimal("15.00"),
+            school_id="SCH-001",
+            activity_id="ACT-ZOO-001",
+        )
+        payload = {
+            "student_name": "Jane Smith",
+            "parent_name": "John Smith",
+            "parent_email": "john@example.com",
+        }
+        r1 = api_client.post(
+            "/api/v1/registrations/", {**payload, "trip": sample_trip.id}, format="json"
+        )
+        r2 = api_client.post(
+            "/api/v1/registrations/", {**payload, "trip": other_trip.id}, format="json"
+        )
+        assert r1.status_code == 201
+        assert r2.status_code == 201
+
+    def test_same_name_different_parent_allowed(self, api_client, sample_trip):
+        r1 = api_client.post(
+            "/api/v1/registrations/",
+            {
+                "student_name": "Jane Smith",
+                "parent_name": "John Smith",
+                "parent_email": "john@example.com",
+                "trip": sample_trip.id,
+            },
+            format="json",
+        )
+        r2 = api_client.post(
+            "/api/v1/registrations/",
+            {
+                "student_name": "Jane Smith",
+                "parent_name": "Sarah Smith",
+                "parent_email": "sarah@example.com",
+                "trip": sample_trip.id,
+            },
+            format="json",
+        )
+        assert r1.status_code == 201
+        assert r2.status_code == 201
+
     def test_create_registration_invalid_email(self, api_client, sample_trip):
         response = api_client.post(
             "/api/v1/registrations/",
@@ -161,6 +254,29 @@ class TestPaymentAPI:
             format="json",
         )
         assert response.status_code == 400
+
+    def test_payment_already_paid(self, api_client, sample_registration):
+        Transaction.objects.create(
+            registration=sample_registration,
+            amount=sample_registration.trip.cost,
+            card_last_four="1111",
+            status=Transaction.Status.SUCCESS,
+            transaction_id="TX-ALREADY-PAID",
+            attempts=1,
+        )
+        response = api_client.post(
+            "/api/v1/payments/",
+            {
+                "registration_id": sample_registration.id,
+                "card_number": "4111111111111111",
+                "expiry_date": "12/26",
+                "cvv": "123",
+            },
+            format="json",
+        )
+        assert response.status_code == 400
+        data = response.json()
+        assert data["code"] == "ALREADY_PAID"
 
     def test_payment_nonexistent_registration(self, api_client, db):
         response = api_client.post(

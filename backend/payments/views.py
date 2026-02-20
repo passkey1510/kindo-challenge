@@ -1,4 +1,5 @@
-from rest_framework import generics, status
+from django.db import IntegrityError
+from rest_framework import generics, serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -15,6 +16,14 @@ class RegistrationCreateView(generics.CreateAPIView):
     queryset = Registration.objects.all()
     serializer_class = RegistrationSerializer
 
+    def perform_create(self, serializer):
+        try:
+            serializer.save()
+        except IntegrityError:
+            raise serializers.ValidationError(
+                "This student is already registered for this trip."
+            ) from None
+
 
 class PaymentCreateView(APIView):
     def post(self, request):
@@ -24,6 +33,16 @@ class PaymentCreateView(APIView):
         registration = Registration.objects.get(
             id=serializer.validated_data["registration_id"]
         )
+
+        if registration.transactions.filter(status=Transaction.Status.SUCCESS).exists():
+            return Response(
+                {
+                    "error": True,
+                    "message": "This registration has already been paid.",
+                    "code": "ALREADY_PAID",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         service = PaymentService()
         try:

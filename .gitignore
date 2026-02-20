@@ -36,10 +36,15 @@ db.sqlite3
 staticfiles/
 media/
 
-# Testing
+# Testing / Coverage
 .coverage
 htmlcov/
 .pytest_cache/
+coverage.xml
+coverage/
+
+# Linting
+.ruff_cache/
 
 # Claude
 .claude/

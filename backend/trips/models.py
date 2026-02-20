@@ -8,6 +8,8 @@ class Trip(models.Model):
     name = models.CharField(max_length=255)
     date = models.DateField()
     location = models.CharField(max_length=255)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     cost = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField(blank=True, default="")
     school_id = models.CharField(max_length=50)

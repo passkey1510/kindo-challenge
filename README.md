@@ -6,29 +6,27 @@ A full-stack school field trip payment application. Parents can view trip detail
 
 ## Architecture
 
-```
-┌─────────────────────┐       ┌─────────────────────────────────────────┐
-│                     │       │              Django Backend              │
-│   React Frontend    │       │                                         │
-│   (Vite + TS)       │       │  ┌─────────┐  ┌──────────────────────┐ │
-│                     │ HTTP  │  │  trips   │  │      payments        │ │
-│  Wizard Flow:       │──────▶│  │  app     │  │  ┌────────────────┐ │ │
-│  1. Trip Details    │       │  │         ╌│  │  │ PaymentService │ │ │
-│  2. Registration    │       │  └─────────┘  │  │  (retry logic)  │ │ │
-│  3. Payment         │       │               │  └───────┬────────┘ │ │
-│  4. Confirmation    │       │               │          │          │ │
-│                     │       │               │  ┌───────▼────────┐ │ │
-└─────────────────────┘       │               │  │ LegacyAdapter  │ │ │
-                              │               │  └───────┬────────┘ │ │
-                              │               │          │          │ │
-                              │               │  ┌───────▼────────┐ │ │
-                              │               │  │ LegacyPayment  │ │ │
-                              │               │  │ Processor      │ │ │
-                              │               │  └────────────────┘ │ │
-                              │               └──────────────────────┘ │
-                              │                                         │
-                              │  PostgreSQL                             │
-                              └─────────────────────────────────────────┘
+```mermaid
+graph LR
+  subgraph Frontend["React Frontend (Vite + TS)"]
+    W1[Trip Details] --> W2[Registration]
+    W2 --> W3[Payment]
+    W3 --> W4[Confirmation]
+  end
+
+  subgraph Backend["Django Backend"]
+    subgraph Apps
+      Trips[trips app]
+      Payments[payments app]
+    end
+    subgraph PaymentStack["Payment Processing"]
+      PS[PaymentService<br/>retry + backoff] --> LA[LegacyAdapter]
+      LA --> LP[LegacyPaymentProcessor]
+    end
+  end
+
+  Frontend -- "HTTP /api/v1/" --> Backend
+  Backend --- DB[(PostgreSQL)]
 ```
 
 ## Tech Stack
@@ -80,11 +78,12 @@ npm run dev
 
 All endpoints are versioned under `/api/v1/`.
 
-| Method | Endpoint                     | Description              |
-|--------|------------------------------|--------------------------|
-| GET    | `/api/v1/trips/:id/`         | Get trip details         |
-| POST   | `/api/v1/registrations/`     | Register child for trip  |
-| POST   | `/api/v1/payments/`          | Submit payment           |
+| Method | Endpoint                       | Description              |
+|--------|--------------------------------|--------------------------|
+| GET    | `/api/v1/trips/`               | List all trips           |
+| GET    | `/api/v1/trips/:uuid/`         | Get trip details         |
+| POST   | `/api/v1/registrations/`       | Register child for trip  |
+| POST   | `/api/v1/payments/`            | Submit payment           |
 | GET    | `/api/v1/payments/:id/status/` | Get payment status/receipt |
 
 ### Error Response Format
@@ -108,13 +107,50 @@ The legacy payment processor is wrapped behind an abstract `PaymentProcessorAdap
 
 The `PaymentService` retries failed payments up to 3 times with exponential backoff (1s → 2s → 4s delays). Only "declined by processor" errors are retried — validation errors (bad card number, missing fields) fail immediately. This prevents unnecessary retries for user input errors while handling transient processor failures gracefully.
 
+```mermaid
+sequenceDiagram
+  participant FE as Frontend
+  participant API as Django API
+  participant PS as PaymentService
+  participant LP as LegacyProcessor
+
+  FE->>API: POST /api/v1/payments/
+  API->>PS: process_payment()
+
+  loop Up to 3 attempts
+    PS->>LP: make_payment()
+    alt Success
+      LP-->>PS: payment_id
+      PS-->>API: PaymentResult(success)
+      API-->>FE: 200 transaction data
+    else Declined (retryable)
+      LP-->>PS: error
+      PS->>PS: wait (1s, 2s, 4s)
+    else Validation error (non-retryable)
+      LP-->>PS: error
+      PS-->>API: PaymentResult(failed)
+      API-->>FE: 502 error
+    end
+  end
+```
+
 ### Synchronous Retries (No Celery)
 
-Retries happen synchronously within the request. Worst case is ~10.5s (3 attempts × 1.5s processing + 1s + 2s + 4s backoff). The frontend sets a 20s timeout. This keeps the architecture simple — no message queues or async workers needed for this use case.
+Retries happen synchronously within the request. Worst case is ~7.5s (3 attempts × 1.5s processing + 1s + 2s backoff between attempts). The frontend sets a 20s timeout. This keeps the architecture simple — no message queues or async workers needed for this use case.
 
 ### Multi-Step Wizard
 
 The frontend uses a single-page wizard pattern with local state management. TanStack Query handles server state (trip data, mutations) while React state manages the current step. This avoids the complexity of a full state management library.
+
+```mermaid
+flowchart LR
+  A[View Trip] -->|Register| B[Enter Details]
+  B -->|Submit| C[Enter Payment]
+  C -->|Pay| D{Payment OK?}
+  D -->|Yes| E[Confirmation]
+  D -->|No| C
+  E -->|New Student| A
+```
 
 ### Currency
 
@@ -122,23 +158,27 @@ All amounts are stored as `DecimalField` in the database and displayed as NZD ($
 
 ## Testing
 
+Requires Docker Compose running (`docker compose up`) so that PostgreSQL is available.
+
 **Backend (26 tests):**
 ```bash
 cd backend
-DATABASE_URL=sqlite:///test.db pytest -v
+source venv/bin/activate
+pytest -v
 ```
 - Payment service retry logic and backoff timing
 - Adapter retryable vs non-retryable error classification
 - All API endpoint happy paths and error cases
 - Validation edge cases
 
-**Frontend (20 tests):**
+**Frontend (36 tests):**
 ```bash
 cd frontend
 npm test
 ```
 - Wizard flow navigation and state management
 - Form validation (registration + payment)
+- Card formatting and input masking
 - Loading states and error handling
 
 ## Project Structure
@@ -184,6 +224,15 @@ This project was built using **Claude Code** (Anthropic's CLI agent) as the prim
 All generated code was reviewed for correctness, security, and adherence to the challenge requirements. The legacy payment processor code was included exactly as provided in the challenge spec.
 
 ## Deployment
+
+```mermaid
+graph TB
+  GH[GitHub] -->|push to main| GHA[GitHub Actions]
+  GHA -->|deploy backend| Railway[Railway<br/>Django + Gunicorn]
+  GH -->|auto-deploy| Vercel[Vercel<br/>React SPA]
+  Railway --- Neon[(Neon PostgreSQL)]
+  Vercel -->|API calls| Railway
+```
 
 **Backend (Railway):**
 - Set env vars: `DATABASE_URL`, `SECRET_KEY`, `ALLOWED_HOSTS`, `CORS_ORIGINS`, `DJANGO_SETTINGS_MODULE=config.settings`

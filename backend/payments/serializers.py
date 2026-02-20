@@ -17,6 +17,18 @@ class RegistrationSerializer(serializers.ModelSerializer):
             "created_at",
         ]
         read_only_fields = ["id", "created_at"]
+        validators = []
+
+    def validate(self, data):
+        if Registration.objects.filter(
+            student_name__iexact=data["student_name"],
+            parent_email__iexact=data["parent_email"],
+            trip=data["trip"],
+        ).exists():
+            raise serializers.ValidationError(
+                "This student is already registered for this trip."
+            )
+        return data
 
 
 class PaymentRequestSerializer(serializers.Serializer):
